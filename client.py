@@ -13,6 +13,8 @@ print("""Type in : 'bye' to exit
         'list' to view your songs
         'play $MUSIC' to play the track of your choice""")
 
+response = s.recv(2048)
+print(response.decode('utf-8'))
 server = True
 while server:
     msg=input("message to send: ")
@@ -21,6 +23,9 @@ while server:
         response = s.recv(2048)
         print(response.decode('utf-8'))
     elif msg == "play":
+        # need to verify if the music is here locally
+
+        # otherwise, ask for it on the server
         s.send(msg.encode())
         response = s.recv(2048)
         print(response.decode('utf-8'))
