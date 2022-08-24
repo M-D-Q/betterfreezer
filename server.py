@@ -10,7 +10,7 @@ def client_handler(connection):
     while True:
         data = connection.recv(2048)
         message = data.decode('utf-8')
-        if message == 'BYE':
+        if message == 'bye':
             break
         reply = f'Server: {message}'
         connection.sendall(str.encode(reply))
