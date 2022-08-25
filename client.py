@@ -1,10 +1,11 @@
 import socket
-import os.path
 import glob
 import os
+import pyaudio
+import wave
 
-HOST = '10.125.24.64'    # The remote host
-PORT = 1233            # The same port as used by the server
+HOST = '10.125.24.64'  # The remote host
+PORT = 1233  # The same port as used by the server
 
 s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 s.connect((HOST, PORT))
@@ -15,11 +16,21 @@ print("""Type in : 'bye' to exit
         'list' to view your songs
         'play $MUSIC' to play the track of your choice""")
 
-response = s.recv(2048)
-print(response.decode('utf-8'))
+# Audio
+FORMAT = pyaudio.paInt16
+CHUNK = 1024
+CHANNELS = 1
+RATE = 44100
+WAVE_OUTPUT_FILENAME = "output.wav"
+p = pyaudio.PyAudio()
+frames = []
+
+# Welcome message
+data = s.recv(1024)
+print('Received', data.decode())
 server = True
 while server:
-    msg=input("message to send: ")
+    msg = input("message to send: ")
     if msg == "liste":
         s.send(msg.encode())
         response = s.recv(2048)
@@ -34,9 +45,24 @@ while server:
             choice = input("Which music do you want to listen to? Enter the index")
             os.system(f"mpv '{possible_findings[int(choice)]}'")
         # otherwise, ask for it on the server
-        s.send(msg.encode())
-        response = s.recv(2048)
-        print(response.decode('utf-8'))
+        else:
+            s.send(msg.encode())
+            stream = p.open(format=FORMAT,
+                            channels=CHANNELS,
+                            rate=RATE,
+                            output=True,
+                            frames_per_buffer=CHUNK)
+            while True:
+                try:
+                    # read data
+                    data = s.recv(CHUNK)
+                    # play stream (3)
+                    stream.write(data)
+                except socket.error as error_message:
+                    break
+            # stop stream (4)
+            stream.stop_stream()
+            stream.close()
     elif msg == "bye":
         break
     else:
@@ -45,3 +71,4 @@ while server:
     print('Received', data.decode())
 
 s.close()
+

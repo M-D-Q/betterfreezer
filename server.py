@@ -1,9 +1,40 @@
 import socket
 import threading
-import maria
+import wave
+import pyaudio
 
 host = '10.125.24.64'
 port = 1233
+CHUNK = 1024
+
+
+def streaming_audio(title, s):
+    wf = wave.open(title, 'rb')
+
+    # instantiate PyAudio (1)
+    p = pyaudio.PyAudio()
+
+    # open stream (2)
+    stream = p.open(format=p.get_format_from_width(wf.getsampwidth()),
+                    channels=wf.getnchannels(),
+                    rate=wf.getframerate(),
+                    output=True)
+
+    # read data
+    data = wf.readframes(CHUNK)
+
+    # play stream (3)
+    while len(data):
+        stream.write(data)
+        data = wf.readframes(CHUNK)
+        s.send(data)
+
+    # stop stream (4)
+    stream.stop_stream()
+    stream.close()
+
+    # close PyAudio (5)
+    p.terminate()
 
 
 def client_handler(connection):
@@ -15,10 +46,12 @@ def client_handler(connection):
             connection.close()
             break
         elif message == "liste":
-
+            # liste_musics =
+            reply = f'Liste of musics: {"Coucou"}'
+        else:
+            streaming_audio("Musics/Fanfare60.wav", connection)
         reply = f'Server: {message}'
         connection.sendall(str.encode(reply))
-
 
 
 def accept_connections(server_socket):
