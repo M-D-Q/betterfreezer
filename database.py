@@ -110,9 +110,11 @@ class Maria():
     def check_user(self, username, password):
         self.cur.execute("""SELECT name, password,
         CASE password
-            WHEN ? THEN
+            WHEN ? THEN "Password accepted"
+            ELSE "Password refused"
+        END
         FROM users
-        WHERE name=?;""",(song_id, playlist_id,))
+        WHERE name=?;""",(password, username,))
         
 """While inserting rows, you may want to find the Primary Key of the last inserted row when 
 it is generated, as with auto-incremented values. You can retrieve this using the lastrowid() method on the cursor."""
