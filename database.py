@@ -88,7 +88,6 @@ class Maria():
 
 
     def add_song_playlist(self, song_id, playlist_id ):
-        #A tester fortement!
         self.cur.execute("""INSERT INTO playlist_songs (song_id, playlist_id)
                 VALUES (?,?);""",(song_id, playlist_id,))
         self.conn.commit()
@@ -105,10 +104,10 @@ class Maria():
 """While inserting rows, you may want to find the Primary Key of the last inserted row when 
 it is generated, as with auto-incremented values. You can retrieve this using the lastrowid() method on the cursor."""
 
-if __name__ == "__main__":
+"""if __name__ == "__main__":
     toast = Maria()
     #toast.add_song_database("M2iCloudDevops", "Chanson5", "Kek/Kek")
     #toast.add_user("Bidon","12345a67890")
     #toast.create_playlist("Max", "Playlist des enfers")
     #toast.add_song_playlist("7", "5484")
-    print(type(toast.playlist_content("1")))
+    print(type(toast.playlist_content("1")))"""
