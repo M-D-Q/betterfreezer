@@ -38,7 +38,7 @@ class Maria():
 
     #list all songs contained in one playlist
     def playlist_content(self, playlist_id):
-        self.cur.execute("""SELECT playlist_songs.id, songs.name, artists.name, playlists.name 
+        self.cur.execute("""SELECT playlist_songs.id, songs.name, songs.id, artists.name, playlists.name 
         FROM playlist_songs
         INNER JOIN songs ON playlist_songs.song_id=songs.id
         INNER JOIN artists ON songs.artist_id=artists.id
