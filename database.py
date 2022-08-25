@@ -24,7 +24,7 @@ class Maria():
     def list_playlists(self, user):
     #list all of the user's playlists
     #additional columns in the select for testing purposes
-        self.cur.execute("""SELECT playlists.name, users.id, playlists.user_id FROM playlists
+        self.cur.execute("""SELECT playlists.name, playlists.id, users.id, playlists.user_id FROM playlists
         INNER JOIN users ON playlists.user_id=users.id
         WHERE users.name = ?; """,(user))
         #return self.cur
@@ -36,8 +36,8 @@ class Maria():
             result.append(line)
             print(line)
         print("================ Finished  ==============")
-        return self.cur
         return result
+
 
     #list all songs contained in one playlist
     def playlist_content(self, playlist_id):
@@ -105,6 +105,17 @@ class Maria():
     def add_user_full(self, username, password):
         self.add_user(self, username, password)
         self.create_playlist(self, username, "My Songs")
+
+# CHECK USER CREDENTIALS ON LOGIN
+    def check_user(self, username, password):
+        self.cur.execute("""SELECT name, password,
+        CASE
+            WHEN name= 
+        FROM users
+        WHERE
+            
+            
+                            VALUES (?,?);""",(song_id, playlist_id,))
         
 """While inserting rows, you may want to find the Primary Key of the last inserted row when 
 it is generated, as with auto-incremented values. You can retrieve this using the lastrowid() method on the cursor."""
