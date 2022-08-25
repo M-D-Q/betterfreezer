@@ -38,22 +38,27 @@ def streaming_audio(title, s):
     # close PyAudio (5)
     p.terminate()
 
+#default value for testing purposes
+user_name = "bidon"
+
 
 def client_handler(connection):
     connection.send(str.encode('You are now connected to the replay server... Type bye to stop'))
-    while True:
+    continue_com = True
+    while continue_com:
         data = connection.recv(2048)
         message = data.decode('utf-8')
         if message == 'bye':
             connection.close()
-            break
+            continue_com = False
         elif message == "liste":
-            liste_musics = db_manager.list_playlists()
-
-            reply = f'Liste of musics: {"Coucou"}'
+            liste_playlists = db_manager.list_playlists(user_name)
+            reply = f'Liste of musics:\n {str(liste_playlists)}'
+            connection.sendall(str.encode(reply))
+        elif "playlist" in message:
+            liste_musics_in_playslists = db_manager.playlist_content()
         else:
             streaming_audio("Musics/Fanfare60.wav", connection)
-        connection.sendall(str.encode(reply))
 
 
 def accept_connections(server_socket):
