@@ -103,8 +103,8 @@ class Maria():
         self.conn.commit()
     
     def add_user_full(self, username, password):
-        add_user(self, username, password)
-        create_playlist(self, username, "My Songs")
+        self.add_user(username, password)
+        self.create_playlist(username, "My Songs")
 
 # CHECK USER CREDENTIALS ON LOGIN
     def check_user(self, username, password):
