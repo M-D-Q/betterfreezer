@@ -2,10 +2,12 @@ import socket
 import threading
 import wave
 import pyaudio
+import database
 
 host = '10.125.24.64'
 port = 1233
 CHUNK = 1024
+db_manager = database.Maria()
 
 
 def streaming_audio(title, s):
@@ -38,7 +40,7 @@ def streaming_audio(title, s):
 
 
 def client_handler(connection):
-    connection.send(str.encode('You are now connected to the replay server... Type BYE to stop'))
+    connection.send(str.encode('You are now connected to the replay server... Type bye to stop'))
     while True:
         data = connection.recv(2048)
         message = data.decode('utf-8')
@@ -46,7 +48,7 @@ def client_handler(connection):
             connection.close()
             break
         elif message == "liste":
-            # liste_musics =
+            liste_musics =
             reply = f'Liste of musics: {"Coucou"}'
         else:
             streaming_audio("Musics/Fanfare60.wav", connection)
