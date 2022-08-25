@@ -58,6 +58,15 @@ class Maria():
         print("================  Finished  ==============")
         return result
 
+    def get_playlist(self, playlist_name):
+        self.cur.execute("""SELECT id FROM playlists
+        WHERE name=?;""",(playlist_name,))
+        
+        for line in self.cur:
+            return line[0]
+        return -1
+
+
     # add song into database
     def add_song_database(self,artist_name,song_name,filename):
         #First add artist | Try 1st time without "try", then do it with try except
@@ -99,15 +108,30 @@ class Maria():
 
 # ADD USER
     def add_user(self, username, password):
-        self.cur.execute("INSERT INTO users (name, password) VALUES (?, ?);",(username, password,))
-        self.conn.commit()
+        try :
+            self.cur.execute("INSERT INTO users (name, password) VALUES (?, ?);",(username, password,))
+            self.conn.commit()
+            self.create_playlist(username, "My Songs")
+        except:
+            print("Username taken")
+            return False
     
-    def add_user_full(self, username, password):
+    """def add_user_full(self, username, password):
         self.add_user(username, password)
-        self.create_playlist(username, "My Songs")
+        self.create_playlist(username, "My Songs")"""
+
+    
 
 # CHECK USER CREDENTIALS ON LOGIN
-    def check_user(self, username, password):
+    def check_username_existence(self,username):
+        self.cur.execute("""SELECT *
+        FROM users
+        WHERE name=?;""",(username,))
+        for line in self.cur:
+            return line[0]
+        return -1
+
+    def check_user_password(self, username, password):
         self.cur.execute("""SELECT name, password,
         CASE password
             WHEN ? THEN "Password accepted"
@@ -115,14 +139,11 @@ class Maria():
         END
         FROM users
         WHERE name=?;""",(password, username,))
-        #Possibily take out the first print to let server.py manage it
         for line in self.cur:
-            print(line[2])
-        if line[2]=="Password accepted":
-            return True
-        else :
-            return False
+            return line[2]=="Password accepted"
+ 
         
+
 """While inserting rows, you may want to find the Primary Key of the last inserted row when 
 it is generated, as with auto-incremented values. You can retrieve this using the lastrowid() method on the cursor."""
 
@@ -135,4 +156,6 @@ if __name__ == "__main__":
     #toast.playlist_content("1")
     #for k in toast.playlist_content("1"):
     #    print(f'k{k}')
-    toast.check_user("Max", "1234547890")
+    #toast.check_user("Max", "1234547890")
+    #toast.get_playlist("Playlist de fou")
+    #print(toast.check_username_existence("Maxd"))
