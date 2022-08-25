@@ -103,19 +103,16 @@ class Maria():
         self.conn.commit()
     
     def add_user_full(self, username, password):
-        self.add_user(self, username, password)
-        self.create_playlist(self, username, "My Songs")
+        add_user(self, username, password)
+        create_playlist(self, username, "My Songs")
 
 # CHECK USER CREDENTIALS ON LOGIN
     def check_user(self, username, password):
         self.cur.execute("""SELECT name, password,
-        CASE
-            WHEN name= 
+        CASE password
+            WHEN ? THEN
         FROM users
-        WHERE
-            
-            
-                            VALUES (?,?);""",(song_id, playlist_id,))
+        WHERE name=?;""",(song_id, playlist_id,))
         
 """While inserting rows, you may want to find the Primary Key of the last inserted row when 
 it is generated, as with auto-incremented values. You can retrieve this using the lastrowid() method on the cursor."""
