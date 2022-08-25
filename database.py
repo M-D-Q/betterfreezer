@@ -115,6 +115,13 @@ class Maria():
         END
         FROM users
         WHERE name=?;""",(password, username,))
+        #Possibily take out the first print to let server.py manage it
+        for line in self.cur:
+            print(line[2])
+        if line[2]=="Password accepted":
+            return True
+        else :
+            return False
         
 """While inserting rows, you may want to find the Primary Key of the last inserted row when 
 it is generated, as with auto-incremented values. You can retrieve this using the lastrowid() method on the cursor."""
@@ -125,6 +132,7 @@ if __name__ == "__main__":
     #toast.add_user("Bidon","12345a67890")
     #toast.create_playlist("Max", "Playlist des enfers")
     #toast.add_song_playlist("7", "5484")
-    toast.playlist_content("1")
-    for k in toast.playlist_content("1"):
-        print(f'k{k}')
+    #toast.playlist_content("1")
+    #for k in toast.playlist_content("1"):
+    #    print(f'k{k}')
+    toast.check_user("Max", "1234547890")
