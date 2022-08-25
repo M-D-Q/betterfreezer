@@ -1,5 +1,6 @@
 import socket
 import threading
+import maria
 
 host = '10.125.24.64'
 port = 1233
@@ -13,6 +14,8 @@ def client_handler(connection):
         if message == 'bye':
             connection.close()
             break
+        elif message == "liste":
+
         reply = f'Server: {message}'
         connection.sendall(str.encode(reply))
 
