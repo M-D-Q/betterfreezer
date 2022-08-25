@@ -29,12 +29,15 @@ class Maria():
         WHERE users.name = ?; """,(user))
         #return self.cur
         # aesthetics
+        result=[]
         print("================ Playlists ==============")
         print("playlists.name, users.id, playlists.user_id")
         for line in self.cur:
+            result.append(line)
             print(line)
         print("================ Finished  ==============")
         return self.cur
+        return result
 
     #list all songs contained in one playlist
     def playlist_content(self, playlist_id):
@@ -46,12 +49,14 @@ class Maria():
         WHERE playlists.id = ?; """,(playlist_id,))
         #return self.cur
         # aesthetics
+        result = []
         print("==============Playlist Content============")
         print("playlist_songs.id, songs.name, artists.name, playlists.name")
         for line in self.cur:
+            result.append(line)
             print(line)
         print("================  Finished  ==============")
-        return self.cur
+        return result
 
     # add song into database
     def add_song_database(self,artist_name,song_name,filename):
@@ -104,10 +109,12 @@ class Maria():
 """While inserting rows, you may want to find the Primary Key of the last inserted row when 
 it is generated, as with auto-incremented values. You can retrieve this using the lastrowid() method on the cursor."""
 
-"""if __name__ == "__main__":
+if __name__ == "__main__":
     toast = Maria()
     #toast.add_song_database("M2iCloudDevops", "Chanson5", "Kek/Kek")
     #toast.add_user("Bidon","12345a67890")
     #toast.create_playlist("Max", "Playlist des enfers")
     #toast.add_song_playlist("7", "5484")
-    print(type(toast.playlist_content("1")))"""
+    toast.playlist_content("1")
+    for k in toast.playlist_content("1"):
+        print(f'k{k}')
