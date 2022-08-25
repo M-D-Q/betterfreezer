@@ -34,6 +34,7 @@ class Maria():
         for line in self.cur:
             print(line)
         print("================ Finished  ==============")
+        return self.cur
 
     #list all songs contained in one playlist
     def playlist_content(self, playlist_id):
@@ -50,6 +51,7 @@ class Maria():
         for line in self.cur:
             print(line)
         print("================  Finished  ==============")
+        return self.cur
 
     # add song into database
     def add_song_database(self,artist_name,song_name,filename):
@@ -74,13 +76,7 @@ class Maria():
                 FROM artists
                 WHERE name=?""",(song_name, filename, artist_name,))
         self.conn.commit()
-        #NEED to manage for duplicate artists
-
-        #Then add song
-        #self.cur.execute("INSERT INTO songs (name, filename) VALUES (?,?)",(song_name,filename))
-        #add the artist_id found using the artist_name 
-        
-        self.conn.commit()
+    
 
     def create_playlist(self, user, playlist_name):
         self.cur.execute("""INSERT INTO playlists (user_id, name)
@@ -101,14 +97,18 @@ class Maria():
     def add_user(self, username, password):
         self.cur.execute("INSERT INTO users (name, password) VALUES (?, ?);",(username, password,))
         self.conn.commit()
+    
+    def add_user_full(self, username, password):
+        self.add_user(self, username, password)
+        self.create_playlist(self, username, "My Songs")
         
 """While inserting rows, you may want to find the Primary Key of the last inserted row when 
 it is generated, as with auto-incremented values. You can retrieve this using the lastrowid() method on the cursor."""
 
-#if __name__ == "__main__":
-   # toast = Maria()
+if __name__ == "__main__":
+    toast = Maria()
     #toast.add_song_database("M2iCloudDevops", "Chanson5", "Kek/Kek")
     #toast.add_user("Bidon","12345a67890")
     #toast.create_playlist("Max", "Playlist des enfers")
     #toast.add_song_playlist("7", "5484")
-    #toast.playlist_content("1")
+    print(type(toast.playlist_content("1")))
