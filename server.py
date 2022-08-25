@@ -48,11 +48,11 @@ def client_handler(connection):
             connection.close()
             break
         elif message == "liste":
-            liste_musics =
+            liste_musics = db_manager.list_playlists()
+
             reply = f'Liste of musics: {"Coucou"}'
         else:
             streaming_audio("Musics/Fanfare60.wav", connection)
-        reply = f'Server: {message}'
         connection.sendall(str.encode(reply))
 
 

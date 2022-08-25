@@ -25,6 +25,7 @@ WAVE_OUTPUT_FILENAME = "output.wav"
 p = pyaudio.PyAudio()
 frames = []
 
+
 # Welcome message
 data = s.recv(1024)
 print('Received', data.decode())
