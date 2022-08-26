@@ -21,8 +21,12 @@ class Maria():
             print(f"Error connecting to MariaDB Platform: {e}")
             sys.exit(1)
 
-    def list_playlists(self, user):
+#===============================================================================================
+#                                         FETCHING STUFF
+#===============================================================================================
+
     #list all of the user's playlists
+    def list_playlists(self, user):
     #additional columns in the select for testing purposes
         self.cur.execute("""SELECT playlists.name, playlists.id, users.id, playlists.user_id FROM playlists
         INNER JOIN users ON playlists.user_id=users.id
@@ -37,7 +41,6 @@ class Maria():
             print(line)
         print("================ Finished  ==============")
         return result
-
 
     #list all songs contained in one playlist
     def playlist_content(self, playlist_id):
@@ -58,6 +61,7 @@ class Maria():
         print("================  Finished  ==============")
         return result
 
+    #Fetch playlist_id by playlist_name
     def get_playlist(self, playlist_name):
         self.cur.execute("""SELECT id FROM playlists
         WHERE name=?;""",(playlist_name,))
@@ -66,12 +70,28 @@ class Maria():
             return line[0]
         return -1
 
+    #Fetch songs.filename by songs.id
+    def fetch_song_filename(self,song_id):
+        self.cur.execute("""SELECT filename FROM songs
+        WHERE id=?;""",(song_id,))
+        for line in self.cur:
+            print(line)
+
+    #Fetch a list of filenames for a given playlists.id
+    def fetch_playlist_filenames(self, playlist_id):
+        self.cur.execute("""SELECT filename
+        FROM songs
+        INNER JOIN playlist_songs ON songs.id=playlist_songs.song_id
+        WHERE playlist_songs.playlist_id=?;""",(playlist_id,))
+        for line in self.cur:
+            print(line)
+
+#============================================================================================
+#                                        ADDING STUFF
+#============================================================================================
 
     # add song into database
     def add_song_database(self,artist_name,song_name,filename):
-        #First add artist | Try 1st time without "try", then do it with try except
-        #if artist exists, then add song
-        #if artist doesnt exist, then add him, then add song.
         try :
             print("coucou dans try)")
             self.cur.execute("INSERT INTO artists (name) VALUES (?);",(artist_name,))
@@ -106,7 +126,13 @@ class Maria():
                 VALUES (?,?);""",(song_id, playlist_id,))
         self.conn.commit()
 
-# ADD USER
+#========================================================================================
+#                                   USER OPERATIONS
+#========================================================================================
+
+
+
+# ADD USER, CHECK USERNAME AVAILABILITY, CREATE DEFAULT PLAYLIST
     def add_user(self, username, password):
         try :
             self.cur.execute("INSERT INTO users (name, password) VALUES (?, ?);",(username, password,))
@@ -121,7 +147,6 @@ class Maria():
         self.create_playlist(username, "My Songs")"""
 
     
-
 # CHECK USER CREDENTIALS ON LOGIN
     def check_username_existence(self,username):
         self.cur.execute("""SELECT *
@@ -159,3 +184,5 @@ if __name__ == "__main__":
     #toast.check_user("Max", "1234547890")
     #toast.get_playlist("Playlist de fou")
     #print(toast.check_username_existence("Maxd"))
+    #toast.fetch_song_filename(5)
+    #toast.fetch_playlist_filenames(1)
