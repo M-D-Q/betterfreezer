@@ -1,9 +1,10 @@
 import sys
 import mariadb
 
+
 class Maria():
-    def __init__ (self):
-    #def __init__ (self,user,password,host,port,db):
+    def __init__(self):
+        # def __init__ (self,user,password,host,port,db):
         # https://mariadb.com/resources/blog/how-to-connect-python-programs-to-mariadb/
         try:
             self.conn = mariadb.connect(
@@ -12,7 +13,7 @@ class Maria():
                 host="localhost",
                 port=3306,
                 database="freezer_db"
-                )
+            )
 
             # Get Cursor
             self.cur = self.conn.cursor()
@@ -21,19 +22,19 @@ class Maria():
             print(f"Error connecting to MariaDB Platform: {e}")
             sys.exit(1)
 
-#===============================================================================================
-#                                         FETCHING STUFF
-#===============================================================================================
+    # ===============================================================================================
+    #                                         FETCHING STUFF
+    # ===============================================================================================
 
-    #list all of the user's playlists
+    # list all of the user's playlists
     def list_playlists(self, user):
-    #additional columns in the select for testing purposes
+        # additional columns in the select for testing purposes
         self.cur.execute("""SELECT playlists.name, playlists.id, users.id, playlists.user_id FROM playlists
         INNER JOIN users ON playlists.user_id=users.id
-        WHERE users.name = ?; """,(user))
-        #return self.cur
+        WHERE users.name = ?; """, (user))
+        # return self.cur
         # aesthetics
-        result=[]
+        result = []
         print("================ Playlists ==============")
         print("playlists.name, users.id, playlists.user_id")
         for line in self.cur:
@@ -42,15 +43,15 @@ class Maria():
         print("================ Finished  ==============")
         return result
 
-    #list all songs contained in one playlist
+    # list all songs contained in one playlist
     def playlist_content(self, playlist_id):
         self.cur.execute("""SELECT playlist_songs.id, songs.name, songs.id, artists.name, playlists.name 
         FROM playlist_songs
         INNER JOIN songs ON playlist_songs.song_id=songs.id
         INNER JOIN artists ON songs.artist_id=artists.id
         INNER JOIN playlists ON playlist_songs.playlist_id=playlists.id
-        WHERE playlists.id = ?; """,(playlist_id,))
-        #return self.cur
+        WHERE playlists.id = ?; """, (playlist_id,))
+        # return self.cur
         # aesthetics
         result = []
         print("==============Playlist Content============")
@@ -61,97 +62,92 @@ class Maria():
         print("================  Finished  ==============")
         return result
 
-    #Fetch playlist_id by playlist_name
+    # Fetch playlist_id by playlist_name
     def get_playlist(self, playlist_name):
         self.cur.execute("""SELECT id FROM playlists
-        WHERE name=?;""",(playlist_name,))
-        
+        WHERE name=?;""", (playlist_name,))
+
         for line in self.cur:
             return line[0]
         return -1
 
-    #Fetch songs.filename by songs.id
-    def fetch_song_filename(self,song_id):
+    # Fetch songs.filename by songs.id
+    def fetch_song_filename(self, song_id):
         self.cur.execute("""SELECT filename FROM songs
-        WHERE id=?;""",(song_id,))
+        WHERE id=?;""", (song_id,))
         for line in self.cur:
             print(line)
 
-    #Fetch a list of filenames for a given playlists.id
+    # Fetch a list of filenames for a given playlists.id
     def fetch_playlist_filenames(self, playlist_id):
         self.cur.execute("""SELECT filename
         FROM songs
         INNER JOIN playlist_songs ON songs.id=playlist_songs.song_id
-        WHERE playlist_songs.playlist_id=?;""",(playlist_id,))
+        WHERE playlist_songs.playlist_id=?;""", (playlist_id,))
         for line in self.cur:
             print(line)
 
-#============================================================================================
-#                                        ADDING STUFF
-#============================================================================================
+    # ============================================================================================
+    #                                        ADDING STUFF
+    # ============================================================================================
 
     # add song into database
-    def add_song_database(self,artist_name,song_name,filename):
-        try :
+    def add_song_database(self, artist_name, song_name, filename):
+        try:
             print("coucou dans try)")
-            self.cur.execute("INSERT INTO artists (name) VALUES (?);",(artist_name,))
+            self.cur.execute("INSERT INTO artists (name) VALUES (?);", (artist_name,))
             self.cur.execute("""INSERT INTO songs (artist_id, name, filename)
                 SELECT id
                 , ? AS name
                 , ? AS filename
                 FROM artists
-                WHERE name=?""",(song_name, filename, artist_name,))
-        except :
+                WHERE name=?""", (song_name, filename, artist_name,))
+        except:
             print("coucou dans except")
             self.cur.execute("""INSERT INTO songs (artist_id, name, filename)
                 SELECT id
                 , ? AS name
                 , ? AS filename
                 FROM artists
-                WHERE name=?""",(song_name, filename, artist_name,))
+                WHERE name=?""", (song_name, filename, artist_name,))
         self.conn.commit()
-    
 
     def create_playlist(self, user, playlist_name):
         self.cur.execute("""INSERT INTO playlists (user_id, name)
                 SELECT id
                 , ? AS name
                 FROM users
-                WHERE name=?;""",(playlist_name, user,))
+                WHERE name=?;""", (playlist_name, user,))
         self.conn.commit()
 
-
-    def add_song_playlist(self, song_id, playlist_id ):
+    def add_song_playlist(self, song_id, playlist_id):
         self.cur.execute("""INSERT INTO playlist_songs (song_id, playlist_id)
-                VALUES (?,?);""",(song_id, playlist_id,))
+                VALUES (?,?);""", (song_id, playlist_id,))
         self.conn.commit()
 
-#========================================================================================
-#                                   USER OPERATIONS
-#========================================================================================
+    # ========================================================================================
+    #                                   USER OPERATIONS
+    # ========================================================================================
 
-
-
-# ADD USER, CHECK USERNAME AVAILABILITY, CREATE DEFAULT PLAYLIST
+    # ADD USER, CHECK USERNAME AVAILABILITY, CREATE DEFAULT PLAYLIST
     def add_user(self, username, password):
-        try :
-            self.cur.execute("INSERT INTO users (name, password) VALUES (?, ?);",(username, password,))
+        try:
+            self.cur.execute("INSERT INTO users (name, password) VALUES (?, ?);", (username, password,))
             self.conn.commit()
             self.create_playlist(username, "My Songs")
         except:
             print("Username taken")
             return False
-    
+
     """def add_user_full(self, username, password):
         self.add_user(username, password)
         self.create_playlist(username, "My Songs")"""
 
-    
-# CHECK USER CREDENTIALS ON LOGIN
-    def check_username_existence(self,username):
+    # CHECK USER CREDENTIALS ON LOGIN
+    def check_username_existence(self, username):
         self.cur.execute("""SELECT *
         FROM users
-        WHERE name=?;""",(username,))
+        WHERE name=?;""", (username,))
         for line in self.cur:
             return line[0]
         return -1
@@ -163,26 +159,25 @@ class Maria():
             ELSE "Password refused"
         END
         FROM users
-        WHERE name=?;""",(password, username,))
+        WHERE name=?;""", (password, username,))
         for line in self.cur:
-            return line[2]=="Password accepted"
- 
-        
+            return line[2] == "Password accepted"
+
 
 """While inserting rows, you may want to find the Primary Key of the last inserted row when 
 it is generated, as with auto-incremented values. You can retrieve this using the lastrowid() method on the cursor."""
 
 if __name__ == "__main__":
     toast = Maria()
-    #toast.add_song_database("M2iCloudDevops", "Chanson5", "Kek/Kek")
-    #toast.add_user("Bidon","12345a67890")
-    #toast.create_playlist("Max", "Playlist des enfers")
-    #toast.add_song_playlist("7", "5484")
-    #toast.playlist_content("1")
-    #for k in toast.playlist_content("1"):
+    # toast.add_song_database("M2iCloudDevops", "Chanson5", "Kek/Kek")
+    # toast.add_user("Bidon","12345a67890")
+    # toast.create_playlist("Max", "Playlist des enfers")
+    # toast.add_song_playlist("7", "5484")
+    # toast.playlist_content("1")
+    # for k in toast.playlist_content("1"):
     #    print(f'k{k}')
-    #toast.check_user("Max", "1234547890")
-    #toast.get_playlist("Playlist de fou")
-    #print(toast.check_username_existence("Maxd"))
-    #toast.fetch_song_filename(5)
-    #toast.fetch_playlist_filenames(1)
+    # toast.check_user("Max", "1234547890")
+    # toast.get_playlist("Playlist de fou")
+    # print(toast.check_username_existence("Maxd"))
+    # toast.fetch_song_filename(5)
+    # toast.fetch_playlist_filenames(1)

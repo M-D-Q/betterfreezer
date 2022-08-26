@@ -3,9 +3,10 @@ import threading
 import wave
 import pyaudio
 import database
+import pytube
 
-host = '10.125.24.64'
-port = 1233
+HOST = '10.125.24.64'
+PORT = 1233
 CHUNK = 1024
 db_manager = database.Maria()
 
@@ -38,11 +39,22 @@ def streaming_audio(title, s):
     # close PyAudio (5)
     p.terminate()
 
-#default value for testing purposes
+
+# default value for testing purposes
 user_name = "bidon"
 
 
+def download_video(key_word):
+    """Takes the first result by default"""
+    search_result = pytube.Search(key_word)
+    only_audio_results = search_result.results[0].streams.filter(only_audio=True)
+    stream = only_audio_results[0]
+    file_path = stream.download()
+    return file_path
+
+
 def client_handler(connection):
+    """The guy who talks with the client"""
     connection.send(str.encode('You are now connected to the replay server... Type bye to stop'))
     continue_com = True
     while continue_com:
@@ -58,10 +70,20 @@ def client_handler(connection):
         elif "playlist" in message:
             liste_musics_in_playslists = db_manager.playlist_content()
         else:
-            streaming_audio("Musics/Fanfare60.wav", connection)
+            # we search on the server if we haven't downloaded the video yet
+            # ok smart boy. How do I get the song id with just a keyword, huh?
+            song_id = -1
+            if song_id > 0:
+                file_path = db_manager.fetch_song_filename(song_id)
+            # if the video isn't downloaded yet
+            else:
+                title = message.split(" ")[1]
+                file_path = download_video(title)
+            streaming_audio(file_path, connection)
 
 
 def accept_connections(server_socket):
+    """Setup the communication between the server and a client"""
     client, address = server_socket.accept()
     print('Connected to: ' + address[0] + ':' + str(address[1]))
     t = threading.Thread(target=client_handler, args=(client,))
@@ -69,6 +91,7 @@ def accept_connections(server_socket):
 
 
 def start_server(host, port):
+    """server setup"""
     server_socket = socket.socket()
     try:
         server_socket.bind((host, port))
@@ -81,4 +104,4 @@ def start_server(host, port):
         accept_connections(server_socket)
 
 
-start_server(host, port)
+start_server(HOST, PORT)
