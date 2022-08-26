@@ -9,7 +9,7 @@ HOST = '10.125.24.64'
 PORT = 1233
 CHUNK = 1024
 db_manager = database.Maria()
-
+PASSWORD_TRY = 3
 
 def streaming_audio(title, s):
     wf = wave.open(title, 'rb')
@@ -40,10 +40,6 @@ def streaming_audio(title, s):
     p.terminate()
 
 
-# default value for testing purposes
-user_name = "bidon"
-
-
 def download_video(key_word):
     """Takes the first result by default"""
     search_result = pytube.Search(key_word)
@@ -55,6 +51,31 @@ def download_video(key_word):
 
 def client_handler(connection):
     """The guy who talks with the client"""
+    # Fist, gonna check if they already exist
+    user_name = connection.recv(2048).decode()
+    user_id = db_manager.check_username_existence(user_name)
+    if user_id < 0:
+        # user doesn't exist. Signing up.
+        connection.send(f"Do you want to create an account, {user_name}".encode())
+        data = connection.recv(2048).decode()
+        if data == "yes":
+            connection.send(f"Choose a password".encode())
+            password = connection.recv(2048).decode()
+            db_manager.add_user(user_name, password)
+        else:
+            return -1
+    else:
+        # user exist. Asking for password
+        number_of_tries = 0
+        valid = False
+        while number_of_tries < PASSWORD_TRY and not valid:
+            number_of_tries += 1
+            connection.send(f"Password ?".encode())
+            password = connection.recv(2048).decode()
+            valid = db_manager.check_user_password(user_name, password)
+
+
+        password_try = connection.recv(2048)
     connection.send(str.encode('You are now connected to the replay server... Type bye to stop'))
     continue_com = True
     while continue_com:
@@ -80,6 +101,7 @@ def client_handler(connection):
                 title = message.split(" ")[1]
                 file_path = download_video(title)
             streaming_audio(file_path, connection)
+    return 0
 
 
 def accept_connections(server_socket):
