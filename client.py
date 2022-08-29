@@ -2,19 +2,14 @@ import socket
 import glob
 import os
 import pyaudio
-import wave
-
-HOST = '10.125.24.64'  # The remote host
-PORT = 1233  # The same port as used by the server
+from constants import *
 
 s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 s.connect((HOST, PORT))
 
-print("Welcome to the future of music streaming")
+print(WELCOME_MESSAGE_CLIENT )
 
-print("""Type in : 'bye' to exit
-        'list' to view your songs
-        'play $MUSIC' to play the track of your choice""")
+print(CLIENT_HELP)
 
 # Audio
 FORMAT = pyaudio.paInt16
@@ -27,33 +22,33 @@ frames = []
 
 
 # Connexion
-user_name = input("Enter your user name: ")
+user_name = input(ENTER_NAME)
 s.send(user_name)
 valid = False
 while not valid:
     data = s.recv(1024)
     print('Server:', data.decode())
-    if data.decode() == "Do you want to create an account" or data.decode() == "Password ?" \
-            or data.decode() == "Choose a password":
+    if data.decode() == CREATE_ACCOUNT or data.decode() == PASSWORD_QUESTION \
+            or data.decode() == CHOOSE_PASSWORD:
         message = input()
         s.send(message.encode())
-    elif "valided" in data.decode():
+    elif VALIDED in data.decode():
         valid = True
 server = True
 while server:
-    msg = input("message to send: ")
-    if msg == "liste":
+    msg = input(MESSAGE_TO_SEND)
+    if msg == ASK_LIST:
         s.send(msg.encode())
         response = s.recv(2048)
         print(response.decode('utf-8'))
-    elif "play" in msg:
+    elif PLAY_KEY_WORD in msg:
         # need to verify if the music is here locally
         # need to think of a better command analysis
         key_word = msg.split(" ")[1]
         possible_findings = glob.glob(f"Musics/*{key_word}*")
         if len(possible_findings) > 0:
             print(possible_findings)
-            choice = input("Which music do you want to listen to? Enter the index")
+            choice = input(CHOOSE_MUSIC)
             os.system(f"mpv '{possible_findings[int(choice)]}'")
         # otherwise, ask for it on the server
         else:
@@ -77,7 +72,7 @@ while server:
     elif msg == "bye":
         break
     else:
-        print("Invalid command line")
+        print(ERR_INVALID_COMMAND)
     data = s.recv(1024)
     print('Received', data.decode())
 
