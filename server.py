@@ -54,6 +54,7 @@ def client_handler(connection):
     # Fist, gonna check if they already exist
     user_name = connection.recv(2048).decode()
     user_id = db_manager.check_username_existence(user_name)
+    valid = False
     if user_id < 0:
         # user doesn't exist. Signing up.
         connection.send(f"Do you want to create an account, {user_name}".encode())
@@ -62,45 +63,45 @@ def client_handler(connection):
             connection.send(f"Choose a password".encode())
             password = connection.recv(2048).decode()
             db_manager.add_user(user_name, password)
+            valid = True
+            connection.send("valided")
         else:
             return -1
     else:
         # user exist. Asking for password
         number_of_tries = 0
-        valid = False
         while number_of_tries < PASSWORD_TRY and not valid:
             number_of_tries += 1
             connection.send(f"Password ?".encode())
             password = connection.recv(2048).decode()
             valid = db_manager.check_user_password(user_name, password)
-
-
-        password_try = connection.recv(2048)
-    connection.send(str.encode('You are now connected to the replay server... Type bye to stop'))
-    continue_com = True
-    while continue_com:
-        data = connection.recv(2048)
-        message = data.decode('utf-8')
-        if message == 'bye':
-            connection.close()
-            continue_com = False
-        elif message == "liste":
-            liste_playlists = db_manager.list_playlists(user_name)
-            reply = f'Liste of musics:\n {str(liste_playlists)}'
-            connection.sendall(str.encode(reply))
-        elif "playlist" in message:
-            liste_musics_in_playslists = db_manager.playlist_content()
-        else:
-            # we search on the server if we haven't downloaded the video yet
-            # ok smart boy. How do I get the song id with just a keyword, huh?
-            song_id = -1
-            if song_id > 0:
-                file_path = db_manager.fetch_song_filename(song_id)
-            # if the video isn't downloaded yet
+    if valid:
+        connection.send("valided")
+        connection.send(str.encode('You are now connected to the replay server... Type bye to stop'))
+        continue_com = True
+        while continue_com:
+            data = connection.recv(2048)
+            message = data.decode('utf-8')
+            if message == 'bye':
+                connection.close()
+                continue_com = False
+            elif message == "liste":
+                liste_playlists = db_manager.list_playlists(user_name)
+                reply = f'Liste of musics:\n {str(liste_playlists)}'
+                connection.sendall(str.encode(reply))
+            elif "playlist" in message:
+                liste_musics_in_playslists = db_manager.playlist_content()
             else:
-                title = message.split(" ")[1]
-                file_path = download_video(title)
-            streaming_audio(file_path, connection)
+                # we search on the server if we haven't downloaded the video yet
+                # ok smart boy. How do I get the song id with just a keyword, huh?
+                song_id = -1
+                if song_id > 0:
+                    file_path = db_manager.fetch_song_filename(song_id)
+                # if the video isn't downloaded yet
+                else:
+                    title = message.split(" ")[1]
+                    file_path = download_video(title)
+                streaming_audio(file_path, connection)
     return 0
 
 

@@ -26,9 +26,19 @@ p = pyaudio.PyAudio()
 frames = []
 
 
-# Welcome message
-data = s.recv(1024)
-print('Received', data.decode())
+# Connexion
+user_name = input("Enter your user name: ")
+s.send(user_name)
+valid = False
+while not valid:
+    data = s.recv(1024)
+    print('Server:', data.decode())
+    if data.decode() == "Do you want to create an account" or data.decode() == "Password ?" \
+            or data.decode() == "Choose a password":
+        message = input()
+        s.send(message.encode())
+    elif "valided" in data.decode():
+        valid = True
 server = True
 while server:
     msg = input("message to send: ")
