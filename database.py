@@ -10,7 +10,7 @@ class Maria():
             self.conn = mariadb.connect(
                 user="freezer",
                 password="freezer",
-                host="localhost",
+                host="172.17.0.5",
                 port=3306,
                 database="freezer_db"
             )
@@ -45,7 +45,7 @@ class Maria():
 
     # list all songs contained in one playlist
     def playlist_content(self, playlist_id):
-        self.cur.execute("""SELECT playlist_songs.id, songs.name, songs.id, artists.name, playlists.name 
+        self.cur.execute("""SELECT playlist_songs.id, songs.name, songs.id, artists.name, playlists.name
         FROM playlist_songs
         INNER JOIN songs ON playlist_songs.song_id=songs.id
         INNER JOIN artists ON songs.artist_id=artists.id
@@ -164,7 +164,7 @@ class Maria():
             return line[2] == "Password accepted"
 
 
-"""While inserting rows, you may want to find the Primary Key of the last inserted row when 
+"""While inserting rows, you may want to find the Primary Key of the last inserted row when
 it is generated, as with auto-incremented values. You can retrieve this using the lastrowid() method on the cursor."""
 
 if __name__ == "__main__":
