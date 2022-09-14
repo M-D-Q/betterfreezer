@@ -5,7 +5,7 @@ import pyaudio
 import database
 import pytube
 
-HOST = '10.125.24.64'
+HOST = '10.5.0.4'
 PORT = 1233
 CHUNK = 1024
 db_manager = database.Maria()
@@ -54,7 +54,7 @@ def client_handler(connection):
     # Fist, gonna check if they already exist
     user_name = connection.recv(2048).decode()
     user_id = db_manager.check_username_existence(user_name)
-    valid = False
+    valid = True
     if user_id < 0:
         # user doesn't exist. Signing up.
         connection.send(f"Do you want to create an account, {user_name}".encode())
@@ -64,7 +64,7 @@ def client_handler(connection):
             password = connection.recv(2048).decode()
             db_manager.add_user(user_name, password)
             valid = True
-            connection.send("valided")
+            connection.send("valided".encode())
         else:
             return -1
     else:
@@ -76,7 +76,7 @@ def client_handler(connection):
             password = connection.recv(2048).decode()
             valid = db_manager.check_user_password(user_name, password)
     if valid:
-        connection.send("valided")
+        connection.send("valided".encode())
         connection.send(str.encode('You are now connected to the replay server... Type bye to stop'))
         continue_com = True
         while continue_com:
@@ -90,7 +90,8 @@ def client_handler(connection):
                 reply = f'Liste of musics:\n {str(liste_playlists)}'
                 connection.sendall(str.encode(reply))
             elif "playlist" in message:
-                liste_musics_in_playslists = db_manager.playlist_content()
+                list_musics_in_playlist = db_manager.playlist_content()
+                connection.send(str.encode(list_musics_in_playlist.encode))
             else:
                 # we search on the server if we haven't downloaded the video yet
                 # ok smart boy. How do I get the song id with just a keyword, huh?

@@ -10,7 +10,7 @@ class Maria():
             self.conn = mariadb.connect(
                 user="freezer",
                 password="freezer",
-                host="172.17.0.5",
+                host="10.5.0.5",
                 port=3306,
                 database="freezer_db"
             )
@@ -31,7 +31,7 @@ class Maria():
         # additional columns in the select for testing purposes
         self.cur.execute("""SELECT playlists.name, playlists.id, users.id, playlists.user_id FROM playlists
         INNER JOIN users ON playlists.user_id=users.id
-        WHERE users.name = ?; """, (user))
+        WHERE users.name = ?; """, (user,))
         # return self.cur
         # aesthetics
         result = []

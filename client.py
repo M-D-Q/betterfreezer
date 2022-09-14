@@ -23,8 +23,8 @@ frames = []
 
 # Connexion
 user_name = input(ENTER_NAME)
-s.send(user_name)
-valid = False
+s.send(user_name.encode())
+valid = True
 while not valid:
     data = s.recv(1024)
     print('Server:', data.decode())
@@ -32,12 +32,14 @@ while not valid:
             or data.decode() == CHOOSE_PASSWORD:
         message = input()
         s.send(message.encode())
-    elif VALIDED in data.decode():
+        data = s.recv(1024)
+        valid = data.decode() == VALIDED
+    elif VALIDED in data.decode() or True:
         valid = True
 server = True
 while server:
     msg = input(MESSAGE_TO_SEND)
-    if msg == ASK_LIST:
+    if msg == "liste":
         s.send(msg.encode())
         response = s.recv(2048)
         print(response.decode('utf-8'))
@@ -77,4 +79,3 @@ while server:
     print('Received', data.decode())
 
 s.close()
-
